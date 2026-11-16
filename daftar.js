@@ -1,5 +1,5 @@
 import { db, doc, getDoc, collection, addDoc, serverTimestamp } from './firebase.js';
-import { COL, DEFAULT_PRICE, TELEGRAM_LINK } from './config.js';
+import { COL, DEFAULT_PRICE, TELEGRAM_LINK, WORKER_URL } from './config.js';
 import { $, esc, rupiah, digits, fmtBytes, toast, lightbox } from './util.js';
 import { shrink, uploadImage } from './upload.js';
 import * as Shell from './shell.js';
@@ -60,7 +60,14 @@ $('#form').addEventListener('submit', async e => {
       uploadImage(files.f1.blob, files.f1.name, p => fld.f1.setProgress(p)),
       uploadImage(files.f2.blob, files.f2.name, p => fld.f2.setProgress(p))
     ]);
-    await addDoc(collection(db, COL.daftar), { phone, telegramShotUrl, proofUrl, price, status: 'pending', createdAt: serverTimestamp() });
+    let inviteLink = null;
+    if (WORKER_URL) {
+      const r = await fetch(WORKER_URL + '/link', { method: 'POST' }), j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.link) throw new Error(j.error || 'Gagal membuat link grup');
+      inviteLink = j.link;
+    }
+    await addDoc(collection(db, COL.daftar), { phone, telegramShotUrl, proofUrl, price, status: 'pending', createdAt: serverTimestamp(), ...(inviteLink ? { inviteLink } : {}) });
+    $('#tg').href = inviteLink || TELEGRAM_LINK;
     $('#form').classList.add('hidden'); $('#done').classList.remove('hidden'); window.scrollTo(0, 0);
   } catch (ex) {
     console.error(ex);

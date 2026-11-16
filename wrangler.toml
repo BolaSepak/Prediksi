@@ -1,0 +1,13 @@
+name = "bolasepak-tg"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+FIREBASE_API_KEY = "AIzaSyCVL_C4opQiKC6fNG_Rw4l-519rQZICH58"
+ADMIN_EMAILS = "diasadhityap@gmail.com,fvcktherules3404@gmail.com"
+ALLOWED_ORIGIN = "*"   # ganti ke alamat situsmu setelah jalan
+
+# buat dulu: wrangler kv namespace create LINKS  -> tempel id di bawah
+[[kv_namespaces]]
+binding = "LINKS"
+id = "GANTI_DENGAN_ID_KV"

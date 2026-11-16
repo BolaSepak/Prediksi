@@ -23,7 +23,7 @@ service cloud.firestore {
 
     // Pendaftaran: publik hanya boleh MEMBUAT (status pending, gambar wajib dari Cloudinary). Baca/ubah/hapus hanya admin.
     match /pred_daftar/{id} {
-      allow create: if request.resource.data.keys().hasOnly(['phone', 'telegramShotUrl', 'proofUrl', 'price', 'status', 'createdAt'])
+      allow create: if request.resource.data.keys().hasOnly(['phone', 'telegramShotUrl', 'proofUrl', 'price', 'status', 'createdAt', 'inviteLink'])
         && request.resource.data.keys().hasAll(['phone', 'telegramShotUrl', 'proofUrl', 'price', 'status', 'createdAt'])
         && request.resource.data.status == 'pending'
         && request.resource.data.phone is string
@@ -34,6 +34,7 @@ service cloud.firestore {
         && request.resource.data.proofUrl.matches('^https://res\\.cloudinary\\.com/.+')
         && request.resource.data.price is int
         && request.resource.data.price >= 0 && request.resource.data.price <= 10000000
+        && (!('inviteLink' in request.resource.data) || (request.resource.data.inviteLink is string && request.resource.data.inviteLink.matches('^https://t\\.me/\\+[A-Za-z0-9_-]+$')))
         && request.resource.data.createdAt == request.time;
       allow read, update, delete: if isAdmin();
     }

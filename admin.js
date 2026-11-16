@@ -1,5 +1,5 @@
 import { auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot, query, orderBy, writeBatch, serverTimestamp, Timestamp, signInWithEmailAndPassword, signOut, onAuthStateChanged } from './firebase.js';
-import { COL, FIREBASE_CONFIG, ADMIN_EMAILS, DEFAULT_PRICE, TELEGRAM_LINK } from './config.js';
+import { COL, FIREBASE_CONFIG, ADMIN_EMAILS, DEFAULT_PRICE, TELEGRAM_LINK, WORKER_URL } from './config.js';
 import * as Shell from './shell.js';
 import { $, $$, esc, rupiah, fmtDateTime, digits, toast, copyText, nextMidnightWIB, lightbox, cldThumb } from './util.js';
 
@@ -100,6 +100,7 @@ function listenRegs() {
   unsubReg = onSnapshot(query(collection(db, COL.daftar), orderBy('createdAt', 'desc')), s => { regs = s.docs.map(d => ({ id: d.id, ...d.data() })); renderRegs(); },
     e => { console.error(e); if (!denied(e)) toast('Gagal membaca pendaftar: ' + (e.code || e.message), true); });
 }
+const shot = (u, l) => u ? `<a href="${esc(u)}" data-zoom="${esc(u)}"><img src="${esc(cldThumb(u))}" alt="${esc(l)}" loading="lazy"><small>${esc(l)}</small></a>` : `<div class="noshot"><span>Tidak ada</span><small>${esc(l)}</small></div>`;
 const ST = { pending: 'Menunggu', approved: 'Disetujui', rejected: 'Ditolak' };
 function renderRegs() {
   const n = k => regs.filter(r => r.status === k).length, pend = n('pending');
@@ -109,7 +110,8 @@ function renderRegs() {
   const list = regs.filter(r => (stFilter === 'all' || r.status === stFilter) && (!q || String(r.phone).includes(q)));
   $('#regList').innerHTML = list.map(r => `<article class="card reg" data-id="${esc(r.id)}">
 <div class="top"><div><div class="ph">+${esc(r.phone)}</div><small class="sub">${esc(fmtDateTime(r.createdAt && r.createdAt.toMillis ? r.createdAt.toMillis() : null))} · ${rupiah(r.price)}</small></div><span class="st ${esc(r.status)}">${esc(ST[r.status] || r.status)}</span></div>
-<div class="shots" style="grid-column:1/-1"><a href="${esc(r.telegramShotUrl)}" data-zoom="${esc(r.telegramShotUrl)}"><img src="${esc(cldThumb(r.telegramShotUrl))}" alt="Profil Telegram" loading="lazy"><small>Profil Telegram</small></a><a href="${esc(r.proofUrl)}" data-zoom="${esc(r.proofUrl)}"><img src="${esc(cldThumb(r.proofUrl))}" alt="Bukti bayar" loading="lazy"><small>Bukti bayar</small></a></div>
+<div class="shots" style="grid-column:1/-1">${shot(r.telegramShotUrl, 'Profil Telegram')}${shot(r.proofUrl, 'Bukti bayar')}</div>
+${r.inviteLink ? `<div class="sub" style="grid-column:1/-1;word-break:break-all"><small>Link grup unik: <code>${esc(r.inviteLink)}</code></small></div>` : ''}
 <div class="acts"><button class="btn sm mint" data-do="approve"${r.status === 'approved' ? ' disabled' : ''}>✓ Approve</button><button class="btn sm red" data-do="reject"${r.status === 'rejected' ? ' disabled' : ''}>✕ Reject</button><button class="btn sm" data-do="del">🗑 Hapus</button><a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/${esc(r.phone)}">WhatsApp</a>${r.status === 'approved' ? '<button class="btn sm lav" data-do="wa">Kirim kode via WA</button>' : ''}</div></article>`).join('') || '<p class="sub">Tidak ada data.</p>';
 }
 async function onRegClick(e) {
@@ -117,14 +119,24 @@ async function onRegClick(e) {
   const b = e.target.closest('[data-do]'); if (!b) return;
   const id = b.closest('[data-id]').dataset.id, r = regs.find(x => x.id === id); if (!r) return;
   try {
-    if (b.dataset.do === 'approve') { await updateDoc(doc(db, COL.daftar, id), { status: 'approved', decidedAt: serverTimestamp() }); toast('Disetujui'); }
-    else if (b.dataset.do === 'reject') { await updateDoc(doc(db, COL.daftar, id), { status: 'rejected', decidedAt: serverTimestamp() }); toast('Ditolak'); }
-    else if (b.dataset.do === 'del') { if (confirm(`Hapus pendaftaran +${r.phone}? Tidak bisa dikembalikan.`)) { await deleteDoc(doc(db, COL.daftar, id)); toast('Dihapus'); } }
+    if (b.dataset.do === 'approve') {
+      const upd = { status: 'approved', decidedAt: serverTimestamp() };
+      if (r.inviteLink && WORKER_URL) { const j = await callWorker('/approve', { link: r.inviteLink }); if (j.link && j.link !== r.inviteLink) upd.inviteLink = j.link; }
+      await updateDoc(doc(db, COL.daftar, id), upd); toast('Disetujui, link langsung bisa dipakai');
+    }
+    else if (b.dataset.do === 'reject') { if (r.inviteLink && WORKER_URL) await callWorker('/revoke', { link: r.inviteLink }).catch(() => {}); await updateDoc(doc(db, COL.daftar, id), { status: 'rejected', decidedAt: serverTimestamp() }); toast('Ditolak, link dimatikan'); }
+    else if (b.dataset.do === 'del') { if (confirm(`Hapus pendaftaran +${r.phone}? Tidak bisa dikembalikan.`)) { if (r.inviteLink && WORKER_URL && r.status !== 'approved') await callWorker('/revoke', { link: r.inviteLink }).catch(() => {}); await deleteDoc(doc(db, COL.daftar, id)); toast('Dihapus'); } }
     else if (b.dataset.do === 'wa') {
-      const msg = `Halo, pembayaran BOLASEPAK kamu sudah disetujui ✅\n\n🔑 Kode hari ini: ${curCode || '(buka /admin dulu)'}\n(kode berganti tiap 00:00 WIB, kode terbaru dibagikan di grup)\nMasuk: ${BASE}\nGrup Telegram: ${TELEGRAM_LINK}`;
+      const msg = `Halo, pembayaran BOLASEPAK kamu sudah disetujui ✅\n\n🔑 Kode hari ini: ${curCode || '(buka /admin dulu)'}\n(kode berganti tiap 00:00 WIB, kode terbaru dibagikan di grup)\nMasuk: ${BASE}\nLink grup Telegram (khusus kamu, sekali pakai): ${r.inviteLink || TELEGRAM_LINK}`;
       window.open(`https://wa.me/${r.phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
     }
   } catch (ex) { console.error(ex); toast('Gagal: ' + (ex.code || ex.message), true); }
+}
+
+async function callWorker(path, body) {
+  const t = await auth.currentUser.getIdToken();
+  const res = await fetch(WORKER_URL + path, { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + t }, body: JSON.stringify(body) });
+  const j = await res.json().catch(() => ({})); if (!res.ok) throw new Error(j.error || 'Worker ' + res.status); return j;
 }
 
 // ---------- harga ----------
