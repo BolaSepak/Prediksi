@@ -7,9 +7,9 @@
 export const DATA_BASE = 'https://fvcktherules3404-sketch.github.io/prediksi/data/';
 
 // Link grup Telegram (muncul setelah pendaftaran terkirim)
-export const TELEGRAM_LINK = 'https://t.me/+r_WV35LTdw4yZTFl';
+export const TELEGRAM_LINK = '';   // sengaja kosong: jangan taruh link grup permanen di situs publik
 
-// Alamat Worker pembuat link Telegram unik (lihat worker.js). Kosong = pakai TELEGRAM_LINK biasa.
+// Alamat Worker pembuat link Telegram unik (lihat worker.js). Wajib diisi agar pendaftar dapat link unik.
 export const WORKER_URL = '';
 
 // Harga default halaman /daftar (bisa diubah dari /admin, tab Harga)

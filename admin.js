@@ -1,5 +1,5 @@
 import { auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot, query, orderBy, writeBatch, serverTimestamp, Timestamp, signInWithEmailAndPassword, signOut, onAuthStateChanged } from './firebase.js';
-import { COL, FIREBASE_CONFIG, ADMIN_EMAILS, DEFAULT_PRICE, TELEGRAM_LINK, WORKER_URL } from './config.js';
+import { COL, FIREBASE_CONFIG, ADMIN_EMAILS, DEFAULT_PRICE, WORKER_URL } from './config.js';
 import * as Shell from './shell.js';
 import { $, $$, esc, rupiah, fmtDateTime, digits, toast, copyText, nextMidnightWIB, lightbox, cldThumb } from './util.js';
 
@@ -127,7 +127,7 @@ async function onRegClick(e) {
     else if (b.dataset.do === 'reject') { if (r.inviteLink && WORKER_URL) await callWorker('/revoke', { link: r.inviteLink }).catch(() => {}); await updateDoc(doc(db, COL.daftar, id), { status: 'rejected', decidedAt: serverTimestamp() }); toast('Ditolak, link dimatikan'); }
     else if (b.dataset.do === 'del') { if (confirm(`Hapus pendaftaran +${r.phone}? Tidak bisa dikembalikan.`)) { if (r.inviteLink && WORKER_URL && r.status !== 'approved') await callWorker('/revoke', { link: r.inviteLink }).catch(() => {}); await deleteDoc(doc(db, COL.daftar, id)); toast('Dihapus'); } }
     else if (b.dataset.do === 'wa') {
-      const msg = `Halo, pembayaran BOLASEPAK kamu sudah disetujui ✅\n\n🔑 Kode hari ini: ${curCode || '(buka /admin dulu)'}\n(kode berganti tiap 00:00 WIB, kode terbaru dibagikan di grup)\nMasuk: ${BASE}\nLink grup Telegram (khusus kamu, sekali pakai): ${r.inviteLink || TELEGRAM_LINK}`;
+      const msg = `Halo, pembayaran BOLASEPAK kamu sudah disetujui ✅\n\n🔑 Kode hari ini: ${curCode || '(buka /admin dulu)'}\n(kode berganti tiap 00:00 WIB, kode terbaru dibagikan di grup)\nMasuk: ${BASE}\nLink grup Telegram (khusus kamu, sekali pakai): ${r.inviteLink || '(belum ada, buat manual)'}`;
       window.open(`https://wa.me/${r.phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
     }
   } catch (ex) { console.error(ex); toast('Gagal: ' + (ex.code || ex.message), true); }

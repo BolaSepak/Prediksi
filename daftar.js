@@ -1,14 +1,13 @@
 import { db, doc, getDoc, collection, addDoc, serverTimestamp } from './firebase.js';
-import { COL, DEFAULT_PRICE, TELEGRAM_LINK, WORKER_URL } from './config.js';
+import { COL, DEFAULT_PRICE, WORKER_URL } from './config.js';
 import { $, esc, rupiah, digits, fmtBytes, toast, lightbox } from './util.js';
 import { shrink, uploadImage } from './upload.js';
 import * as Shell from './shell.js';
-Shell.set([{ g: 'menu' }, { id: 'masuk', ic: '🔑', lb: 'masuk dengan kode', href: './' }, { id: 'daftar', ic: '📝', lb: 'daftar member', href: 'daftar.html' }, { g: 'bantuan' }, { id: 'tg', ic: '✈️', lb: 'grup telegram', href: TELEGRAM_LINK, ext: true }], 'daftar');
+Shell.set([{ g: 'menu' }, { id: 'masuk', ic: '🔑', lb: 'masuk dengan kode', href: './' }, { id: 'daftar', ic: '📝', lb: 'daftar member', href: 'daftar.html' }], 'daftar');
 
 let price = DEFAULT_PRICE;
 const files = { f1: null, f2: null };   // {blob,name,before,after,preview}
 
-$('#tg').href = TELEGRAM_LINK;
 $('#price').textContent = rupiah(price);
 $('#qris').addEventListener('click', () => lightbox($('#qris').src));
 getDoc(doc(db, COL.settings, 'price')).then(s => { const a = s.exists() && Number(s.data().amount); if (a > 0) { price = a; $('#price').textContent = rupiah(price); } }).catch(() => {});
@@ -67,7 +66,7 @@ $('#form').addEventListener('submit', async e => {
       inviteLink = j.link;
     }
     await addDoc(collection(db, COL.daftar), { phone, telegramShotUrl, proofUrl, price, status: 'pending', createdAt: serverTimestamp(), ...(inviteLink ? { inviteLink } : {}) });
-    $('#tg').href = inviteLink || TELEGRAM_LINK;
+    if (inviteLink) { $('#tg').href = inviteLink; } else { $('#tg').classList.add('hidden'); $('#tgNote').classList.remove('hidden'); }
     $('#form').classList.add('hidden'); $('#done').classList.remove('hidden'); window.scrollTo(0, 0);
   } catch (ex) {
     console.error(ex);

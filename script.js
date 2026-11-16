@@ -1,7 +1,7 @@
 import { $, $$, esc, pct, fmtTime, toast } from './util.js';
 import * as G from './gate.js';
 import * as R from './render.js';
-import { DATA_BASE, TELEGRAM_LINK } from './config.js';
+import { DATA_BASE } from './config.js';
 import * as Shell from './shell.js';
 const S = { view: 'prediksi', tab: 'rumus', sesi: 'all', league: 'home', menu: false, q: '', sort: 'time', data: null, meta: null, cal: null,
   h: { src: 'rumus', tab: 'ok', res: 'all', period: 'all', league: 'all', conf: 'all', q: '', limit: 150 } };
@@ -9,7 +9,7 @@ let sessionTimer = null, started = false, prevShown = null;
 setInterval(() => { const on = R.previewOn(); if (prevShown !== null && on !== prevShown && S.data && S.view === 'prediksi') renderPrediksi(); prevShown = on; }, 30000);   // catatan Pratinjau hilang sendiri jam 21:30 WIB
 
 // ---------- menu samping (hamburger di HP, sidebar di desktop) ----------
-const NAV_TAIL = [{ g: 'member' }, { id: 'daftar', ic: '📝', lb: 'daftar member', href: 'daftar.html' }, { id: 'tg', ic: '✈️', lb: 'grup telegram', href: TELEGRAM_LINK, ext: true }];
+const NAV_TAIL = [{ g: 'member' }, { id: 'daftar', ic: '📝', lb: 'daftar member', href: 'daftar.html' }];
 const NAV_LOCK = [{ g: 'menu' }, { id: 'masuk', ic: '🔑', lb: 'masukkan kode' }, ...NAV_TAIL];
 const NAV_IN = [{ g: 'prediksi' }, { id: 'rumus', ic: '📊', lb: 'rumus' }, { id: 'ai', ic: '🤖', lb: 'ai' }, { g: 'rekam jejak' }, { id: 'riwayat', ic: '📜', lb: 'riwayat' }, ...NAV_TAIL, { id: 'out', ic: '🚪', lb: 'keluar' }];
 const syncNav = () => Shell.active(S.view === 'riwayat' ? 'riwayat' : S.tab);
