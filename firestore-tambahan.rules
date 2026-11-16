@@ -1,0 +1,34 @@
+// TEMPEL 3 blok di bawah ini ke rules Firestore project yang sudah ada (Firebase Console > Firestore > Rules),
+// di DALAM  match /databases/{database}/documents { ... }  tepat di bawah blok lain. Lalu klik Publish.
+// Memakai fungsi isAdmin() yang SUDAH ADA di rules FucktheRules (jangan ditulis dua kali).
+// Kalau rules kamu belum punya isAdmin(), tambahkan dulu:
+//   function isAdmin() { return request.auth != null && request.auth.token.email in ['diasadhityap@gmail.com','fvcktherules3404@gmail.com']; }
+
+    // KODE HARIAN: ID dokumen = kodenya. Publik hanya bisa "get" (bukan list) selama belum kedaluwarsa.
+    match /pred_codes/{code} {
+      allow get: if isAdmin() || (resource != null && resource.data.expiresAt > request.time);
+      allow list, write: if isAdmin();
+    }
+
+    // PENGATURAN: price boleh dibaca publik; current (kode aktif) hanya admin.
+    match /pred_settings/{id} {
+      allow get: if id == 'price' || isAdmin();
+      allow list, write: if isAdmin();
+    }
+
+    // PENDAFTARAN: publik hanya boleh membuat (pending, gambar dari Cloudinary). Baca/ubah/hapus hanya admin.
+    match /pred_daftar/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['phone', 'telegramShotUrl', 'proofUrl', 'price', 'status', 'createdAt'])
+        && request.resource.data.keys().hasAll(['phone', 'telegramShotUrl', 'proofUrl', 'price', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.phone is string
+        && request.resource.data.phone.matches('^628[0-9]{8,11}$')
+        && request.resource.data.telegramShotUrl is string
+        && request.resource.data.telegramShotUrl.matches('^https://res\\.cloudinary\\.com/.+')
+        && request.resource.data.proofUrl is string
+        && request.resource.data.proofUrl.matches('^https://res\\.cloudinary\\.com/.+')
+        && request.resource.data.price is int
+        && request.resource.data.price >= 0 && request.resource.data.price <= 10000000
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }

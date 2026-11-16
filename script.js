@@ -5,7 +5,8 @@ import { DATA_BASE, TELEGRAM_LINK } from './config.js';
 import * as Shell from './shell.js';
 const S = { view: 'prediksi', tab: 'rumus', sesi: 'all', league: 'home', menu: false, q: '', sort: 'time', data: null, meta: null, cal: null,
   h: { src: 'rumus', tab: 'ok', res: 'all', period: 'all', league: 'all', conf: 'all', q: '', limit: 150 } };
-let sessionTimer = null, started = false;
+let sessionTimer = null, started = false, prevShown = null;
+setInterval(() => { const on = R.previewOn(); if (prevShown !== null && on !== prevShown && S.data && S.view === 'prediksi') renderPrediksi(); prevShown = on; }, 30000);   // catatan Pratinjau hilang sendiri jam 21:30 WIB
 
 // ---------- menu samping (hamburger di HP, sidebar di desktop) ----------
 const NAV_TAIL = [{ g: 'member' }, { id: 'daftar', ic: '📝', lb: 'daftar member', href: 'daftar.html' }, { id: 'tg', ic: '✈️', lb: 'grup telegram', href: TELEGRAM_LINK, ext: true }];
@@ -70,6 +71,7 @@ async function load() {
     $('#warn').innerHTML = '<div class="warn">Data prediksi belum bisa diambil dari sumbernya. <button class="btn sm" id="retry" type="button">Coba lagi</button></div>';
     $('#retry').addEventListener('click', load);
   } else if (S.meta && S.meta.status === 'failed') $('#warn').innerHTML = `<div class="warn">Update terakhir gagal (${esc(S.meta.message)}). Menampilkan prediksi terakhir yang berhasil.</div>`;
+  R.setGeneratedAt(S.data && S.data.generatedAt);
   if (S.data) $('#meta').textContent = `Laga ${fmtTime(S.data.window.start)} → ${fmtTime(S.data.window.end)} · diperbarui ${fmtTime(S.data.generatedAt)} · update otomatis 05:30, 07:10 & 21:00 WIB`;
   renderPrediksi(); if (S.view === 'riwayat') renderRiwayat();
 }

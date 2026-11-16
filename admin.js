@@ -1,5 +1,5 @@
 import { auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot, query, orderBy, writeBatch, serverTimestamp, Timestamp, signInWithEmailAndPassword, signOut, onAuthStateChanged } from './firebase.js';
-import { COL, ADMIN_EMAILS, DEFAULT_PRICE, TELEGRAM_LINK } from './config.js';
+import { COL, FIREBASE_CONFIG, ADMIN_EMAILS, DEFAULT_PRICE, TELEGRAM_LINK } from './config.js';
 import * as Shell from './shell.js';
 import { $, $$, esc, rupiah, fmtDateTime, digits, toast, copyText, nextMidnightWIB, lightbox, cldThumb } from './util.js';
 
@@ -7,6 +7,14 @@ const curRef = doc(db, COL.settings, 'current'), priceRef = doc(db, COL.settings
 const NAV = [{ g: 'dasbor' }, { id: 'kode', ic: '🔑', lb: 'kode' }, { id: 'bukti', ic: '🧾', lb: 'cek bukti', n: 0 }, { id: 'harga', ic: '💰', lb: 'harga' }, { g: 'lainnya' }, { id: 'site', ic: '⚽', lb: 'lihat situs', href: './' }, { id: 'out', ic: '🚪', lb: 'keluar' }];
 Shell.onNav(id => { if (id === 'out') signOut(auth); else { const b = $(`#tabs [data-t="${id}"]`); if (b) b.click(); window.scrollTo(0, 0); } });
 let curCode = null, curExp = 0, generating = false, unsubReg = null, regs = [], stFilter = 'pending', timer = null;
+
+// permission-denied = rules Firestore belum dipasang / email tidak ada di isAdmin() pada rules yang aktif
+function denied(e) {
+  if (!e || e.code !== 'permission-denied') return false;
+  const w = $('#rulesWarn'), em = auth.currentUser ? auth.currentUser.email : '';
+  w.innerHTML = `<b>Firebase menolak akses (permission-denied).</b> Rules Firestore di project <b>${esc(FIREBASE_CONFIG.projectId)}</b> belum berisi koleksi <b>pred_codes</b>, <b>pred_settings</b>, <b>pred_daftar</b> (atau email <b>${esc(em)}</b> tidak ada di <code>isAdmin()</code>).<br>Perbaiki: Firebase Console → Firestore Database → Rules → tempel isi file <b>firestore-tambahan.rules</b> di dalam <code>match /databases/{database}/documents</code> → <b>Publish</b> → muat ulang halaman ini.`;
+  w.classList.remove('hidden'); return true;
+}
 
 // ---------- login ----------
 onAuthStateChanged(auth, async u => {
@@ -53,7 +61,7 @@ function randCode() { const a = new Uint32Array(6); crypto.getRandomValues(a); r
 const BASE = location.origin + location.pathname.replace(/[^/]*$/, '');
 const shareMsg = () => `🔑 Kode BOLASEPAK hari ini: ${curCode || '······'}\nBerlaku sampai 00:00 WIB.\nMasuk: ${BASE}`;
 async function initCode() {
-  try { const s = await getDoc(curRef); if (s.exists()) { curCode = s.data().code; curExp = s.data().expiresAt.toMillis(); } } catch (e) { console.error(e); toast('Gagal membaca kode: ' + (e.code || e.message), true); }
+  try { const s = await getDoc(curRef); if (s.exists()) { curCode = s.data().code; curExp = s.data().expiresAt.toMillis(); } } catch (e) { console.error(e); if (!denied(e)) toast('Gagal membaca kode: ' + (e.code || e.message), true); }
   if (!curCode || curExp <= Date.now()) await generate(); else paintCode();
   cleanupOld();
   timer = setInterval(tick, 1000);
@@ -70,8 +78,8 @@ async function generate() {
     b.set(curRef, { code, createdAt: serverTimestamp(), expiresAt });
     if (curCode) b.delete(doc(db, COL.codes, curCode));
     await b.commit();
-    curCode = code; curExp = expiresAt.toMillis(); paintCode(); toast('Kode baru dibuat');
-  } catch (e) { console.error(e); toast('Gagal membuat kode: ' + (e.code || e.message), true); }
+    curCode = code; curExp = expiresAt.toMillis(); $('#rulesWarn').classList.add('hidden'); paintCode(); toast('Kode baru dibuat');
+  } catch (e) { console.error(e); if (!denied(e)) toast('Gagal membuat kode: ' + (e.code || e.message), true); }
   generating = false;
 }
 async function cleanupOld() {
@@ -90,7 +98,7 @@ function tick() {
 function listenRegs() {
   if (unsubReg) unsubReg();
   unsubReg = onSnapshot(query(collection(db, COL.daftar), orderBy('createdAt', 'desc')), s => { regs = s.docs.map(d => ({ id: d.id, ...d.data() })); renderRegs(); },
-    e => { console.error(e); toast('Gagal membaca pendaftar: ' + (e.code || e.message), true); });
+    e => { console.error(e); if (!denied(e)) toast('Gagal membaca pendaftar: ' + (e.code || e.message), true); });
 }
 const ST = { pending: 'Menunggu', approved: 'Disetujui', rejected: 'Ditolak' };
 function renderRegs() {

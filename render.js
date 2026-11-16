@@ -2,6 +2,16 @@
 import { esc, pct, acc, fmtLine, fmtTime } from './util.js';
 import { pickOptions, hdpPick } from './picks.js';
 
+// Catatan "Pratinjau" (laga malam dari update pagi) otomatis hilang setelah 21:30 WIB pada tanggal update itu,
+// walaupun update 21:00 di mesin utama gagal.
+let genAt = null;
+export const setGeneratedAt = t => { genAt = t ? new Date(t).getTime() : null; };
+export function previewOn(now = Date.now()) {
+  if (!genAt) return true;
+  const w = new Date(genAt + 7 * 3600e3);   // WIB = UTC+7
+  const cutoff = Date.UTC(w.getUTCFullYear(), w.getUTCMonth(), w.getUTCDate(), 21, 30) - 7 * 3600e3;
+  return now < cutoff;
+}
 export const slotOf = m => { if (m.slot) return m.slot; const h = (new Date(m.kickoff).getUTCHours() + 7) % 24; return h >= 6 && h < 21 ? 'pagi' : 'malam'; };
 export const levelOf = conf => (conf >= 50 ? 'high' : conf >= 30 ? 'medium' : 'low');
 const pickLabel = (p, k) => (k === '1' ? `${p.home.name} menang` : k === '2' ? `${p.away.name} menang` : 'Seri');
@@ -30,7 +40,7 @@ export function cardRumus(p) {
   const aiCtx = p.context && p.context.info && p.context.info.ai ? `<p><b>Konteks dari AI</b> (berita web): ${p.context.info.ai.signals} sinyal / ${p.context.info.ai.nSrc} sumber · xG ${sign(p.context.info.ai.xg.home)} / ${sign(p.context.info.ai.xg.away)}${p.context.tags.filter(t => t.ai).map(t => `<small style="display:block">${esc(t.label)}: ${esc(t.title || '')}</small>`).join('')}</p>` : '';
   const gp = p.picks.goals === 'Over 2.5' ? p.ou[1].over : p.ou[1].under;
   return `<article class="card pc"><header><span>${esc(p.league.name)}${p.league.country ? ' · ' + esc(p.league.country) : ''}</span><span>${esc(fmtTime(p.kickoff))}</span></header>
-${p.preview ? '<div class="prev">⏳ Pratinjau · diperbarui 21:00 WIB</div>' : ''}
+${p.preview && previewOn() ? '<div class="prev">⏳ Pratinjau · diperbarui 21:00–21:30 WIB</div>' : ''}
 <div class="teams"><div>${logo(p.home)}<b>${esc(p.home.name)}</b><small>#${p.home.rank ?? '-'} ${formHtml(p.home.form)}${srcHtml(p.home.dataSource)}</small></div>${vsHtml(p)}<div>${logo(p.away)}<b>${esc(p.away.name)}</b><small>#${p.away.rank ?? '-'} ${formHtml(p.away.form)}${srcHtml(p.away.dataSource)}</small></div></div>
 <div class="bar"><span class="h" style="width:${pct(h)}">${pct(h)}</span><span class="d" style="width:${pct(d)}">${pct(d)}</span><span class="a" style="width:${pct(a)}">${pct(a)}</span></div>
 <div class="odds">Fair odds: ${p.fairOdds.home} / ${p.fairOdds.draw} / ${p.fairOdds.away}</div>
