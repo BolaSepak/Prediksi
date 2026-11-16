@@ -177,3 +177,11 @@ h2.sec small{text-transform:none;display:inline}
   .side:not(.wide) .dlink .bd{position:absolute;top:2px;right:8px;padding:0 6px;font-size:10px}
   .side.wide .dlink:hover{padding-left:16px}
 }
+
+/* upload otomatis + status */
+.spin{width:22px;height:22px;border:3px solid var(--ink);border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;flex:none}@keyframes sp{to{transform:rotate(360deg)}}
+.prog.ind i{width:40%;animation:ind 1s ease-in-out infinite}@keyframes ind{0%{margin-left:-40%}100%{margin-left:100%}}
+.prog.done i{width:100%!important}.filechip.done{background:#f1fff4}
+.filechip .ck{font-size:20px;animation:pop .35s ease}@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.35)}100%{transform:scale(1)}}
+.stat{font-weight:800;padding:10px 14px;border:2px solid var(--ink);border-radius:var(--r-sm);margin:10px 0}.stat.wait{background:var(--sun)}.stat.ok{background:var(--mint)}.stat.bad{background:var(--rose)}
+.btn.busy{opacity:.7;pointer-events:none}

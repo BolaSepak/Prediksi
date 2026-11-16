@@ -36,25 +36,35 @@ export default {
         await env.LINKS.put('link:' + r.invite_link, '1');
         return out(env, { link: r.invite_link });
       }
+      // Publik: status link (menunggu / disetujui / ditolak) untuk layar pendaftar
+      if (p === '/status') {
+        const { link } = await req.json();
+        if (!(await known(env, link))) return out(env, { status: 'unknown' }, 404);
+        const v = await env.LINKS.get('st:' + link);
+        return out(env, v ? JSON.parse(v) : { status: 'pending' });
+      }
       // Admin saja
       if (p === '/approve' || p === '/revoke') {
         if (!(await adminEmail(env, req))) return out(env, { error: 'Bukan admin' }, 403);
         const { link } = await req.json();
         if (!(await known(env, link))) return out(env, { error: 'Link tidak dikenal' }, 404);
         const pending = await env.LINKS.get('req:' + link);
-        if (p === '/revoke') { await tg(env, 'revokeChatInviteLink', { invite_link: link }).catch(() => {}); return out(env, { ok: true }); }
+        if (p === '/revoke') { await tg(env, 'revokeChatInviteLink', { invite_link: link }).catch(() => {}); await env.LINKS.put('st:' + link, JSON.stringify({ status: 'rejected' })); return out(env, { ok: true }); }
         if (pending) {   // sudah sempat kirim permintaan gabung: setujui langsung, lalu matikan link
           await tg(env, 'approveChatJoinRequest', { user_id: Number(pending) });
           await tg(env, 'revokeChatInviteLink', { invite_link: link }).catch(() => {});
+          await env.LINKS.put('st:' + link, JSON.stringify({ status: 'approved', link }));
           return out(env, { link, joined: true });
         }
         try {            // ubah link yang sama jadi masuk-langsung, sekali pakai, tanpa kedaluwarsa
           await tg(env, 'editChatInviteLink', { invite_link: link, creates_join_request: false, member_limit: 1 });
+          await env.LINKS.put('st:' + link, JSON.stringify({ status: 'approved', link }));
           return out(env, { link });
         } catch {        // cadangan: cabut lalu buat link baru sekali pakai
           await tg(env, 'revokeChatInviteLink', { invite_link: link }).catch(() => {});
           const r = await tg(env, 'createChatInviteLink', { member_limit: 1, name: 'member ' + new Date().toISOString().slice(0, 16) });
           await env.LINKS.put('link:' + r.invite_link, '1');
+          await env.LINKS.put('st:' + link, JSON.stringify({ status: 'approved', link: r.invite_link }));
           return out(env, { link: r.invite_link });
         }
       }

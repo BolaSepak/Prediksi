@@ -42,15 +42,15 @@
 
     <div id="sendErr" class="err" role="alert"></div>
     <button id="send" class="btn primary block" type="submit" disabled>kirim pendaftaran</button>
-    <p class="sub" style="text-align:center">Foto otomatis diperkecil sebelum diupload.</p>
+    <p class="sub" style="text-align:center">Foto otomatis diperkecil dan diunggah begitu dipilih.</p>
   </form>
 
   <section id="done" class="q done hidden">
     <div class="tick">✅</div><h2 style="font-size:34px">terkirim!</h2>
-    <p>Bukti kamu sudah masuk dan menunggu dicek admin. Link di bawah khusus untukmu dan hanya bisa dipakai sekali, jangan dibagikan. Tekan untuk minta gabung; setelah admin menyetujui kamu langsung masuk grup.</p>
+    <div id="stat" class="stat wait">⏳ Menunggu persetujuan admin</div>
+    <p id="tgHelp">Tekan tombol di bawah untuk minta gabung grup. Begitu admin menyetujui pembayaranmu, kamu otomatis diterima. Link ini khusus untukmu dan hanya sekali pakai, jangan dibagikan.</p>
     <a id="tg" class="btn mint block" target="_blank" rel="noopener">gabung grup telegram</a>
-    <p id="tgNote" class="sub hidden"><b>Link grup akan dikirim admin lewat WhatsApp</b> setelah bukti kamu dicek.</p>
-    <p class="sub" style="margin-top:14px">Sudah dapat kode? <a href="./"><b>Masuk di sini</b></a></p>
+    <p class="sub" style="margin-top:14px">Sudah dapat kode? <a href="./"><b>Masuk di sini</b></a> · <a href="#" id="again">daftar nomor lain</a></p>
   </section>
 </main>
 </div></div>
