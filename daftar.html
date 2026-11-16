@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Daftar — BOLASEPAK</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+<aside id="side" class="side" aria-label="Menu"></aside><div id="scrim" class="scrim"></div>
+<div class="col">
+<header class="mast">
+  <button id="burger" class="burger" type="button" aria-label="Menu" aria-controls="side" aria-expanded="false"><i></i><i></i><i></i></button>
+  <a class="logo" href="./"><img src="logo.png" alt="BOLASEPAK">bolasepak<b>prediksi</b></a>
+  <span class="ttl d-only">daftar member</span>
+  <div class="right"><a class="btn sm m-only" href="./">sudah punya kode</a></div>
+</header>
+<main class="wrap narrow">
+  <h1 class="m-only">daftar member</h1>
+  <p class="sub">Isi data, bayar lewat QRIS, upload bukti. Setelah dicek admin, kamu dapat kode harian lewat grup Telegram.</p>
+
+  <form id="form" novalidate>
+    <div class="q"><h3>Nomor HP <span class="req">*</span></h3><p class="hint">Nomor WhatsApp/Telegram yang aktif, contoh 081234567890.</p>
+      <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="08xxxxxxxxxx" maxlength="18"><div id="phoneErr" class="err"></div></div>
+
+    <div class="q"><h3>Screenshot profil Telegram <span class="req">*</span></h3><p class="hint">Tampilkan username/nomor Telegram kamu supaya admin bisa menambahkan ke grup.</p>
+      <div id="f1"></div></div>
+
+    <div class="q"><h3>Pembayaran QRIS</h3><p class="hint">Scan QRIS di bawah, bayar sesuai nominal.</p>
+      <div class="price" id="price">Rp …</div>
+      <img id="qris" class="qris" src="qris.jpg" alt="QRIS pembayaran">
+      <div class="row"><a class="btn sm" href="qris.jpg" download="QRIS-BOLASEPAK.jpg">⬇ simpan qris</a></div></div>
+
+    <div class="q"><h3>Upload bukti pembayaran <span class="req">*</span></h3><p class="hint">Screenshot bukti transfer/QRIS yang berhasil.</p>
+      <div id="f2"></div></div>
+
+    <div id="sendErr" class="err" role="alert"></div>
+    <button id="send" class="btn primary block" type="submit" disabled>kirim pendaftaran</button>
+    <p class="sub" style="text-align:center">Foto otomatis diperkecil sebelum diupload.</p>
+  </form>
+
+  <section id="done" class="q done hidden">
+    <div class="tick">✅</div><h2 style="font-size:34px">terkirim!</h2>
+    <p>Bukti kamu sudah masuk dan menunggu dicek admin. Gabung grup Telegram dulu supaya kode harian bisa diterima.</p>
+    <a id="tg" class="btn mint block" target="_blank" rel="noopener">gabung grup telegram</a>
+    <p class="sub" style="margin-top:14px">Sudah dapat kode? <a href="./"><b>Masuk di sini</b></a></p>
+  </section>
+</main>
+</div></div>
+<script type="module" src="daftar.js"></script>
+</body>
+</html>

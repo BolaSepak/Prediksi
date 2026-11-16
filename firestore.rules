@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin = email di daftar ini (harus sama dengan ADMIN_EMAILS di js/config.js dan terdaftar di Firebase Authentication)
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['diasadhityap@gmail.com', 'fvcktherules3404@gmail.com'];
+    }
+
+    // KODE HARIAN. ID dokumen = kodenya (6 huruf). Hanya bisa "get" kalau tahu kode persis dan belum kedaluwarsa;
+    // tidak ada list untuk publik, jadi kode tidak bisa diintip. Dibuat/dihapus admin.
+    match /pred_codes/{code} {
+      allow get: if isAdmin() || (resource != null && resource.data.expiresAt > request.time);
+      allow list, write: if isAdmin();
+    }
+
+    // Pengaturan: price (harga) boleh dibaca publik; current (kode aktif) hanya admin.
+    match /pred_settings/{id} {
+      allow get: if id == 'price' || isAdmin();
+      allow list, write: if isAdmin();
+    }
+
+    // Pendaftaran: publik hanya boleh MEMBUAT (status pending, gambar wajib dari Cloudinary). Baca/ubah/hapus hanya admin.
+    match /pred_daftar/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['phone', 'telegramShotUrl', 'proofUrl', 'price', 'status', 'createdAt'])
+        && request.resource.data.keys().hasAll(['phone', 'telegramShotUrl', 'proofUrl', 'price', 'status', 'createdAt'])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.phone is string
+        && request.resource.data.phone.matches('^628[0-9]{8,11}$')
+        && request.resource.data.telegramShotUrl is string
+        && request.resource.data.telegramShotUrl.matches('^https://res\\.cloudinary\\.com/.+')
+        && request.resource.data.proofUrl is string
+        && request.resource.data.proofUrl.matches('^https://res\\.cloudinary\\.com/.+')
+        && request.resource.data.price is int
+        && request.resource.data.price >= 0 && request.resource.data.price <= 10000000
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admin — BOLASEPAK</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+<aside id="side" class="side" aria-label="Menu"></aside><div id="scrim" class="scrim"></div>
+<div class="col">
+<header class="mast">
+  <button id="burger" class="burger" type="button" aria-label="Menu" aria-controls="side" aria-expanded="false"><i></i><i></i><i></i></button>
+  <a class="logo" href="./"><img src="logo.png" alt="BOLASEPAK">bolasepak<b>prediksi</b></a>
+  <span class="ttl d-only">admin</span>
+  <div class="right"><span id="who" class="sub hidden d-only"></span><button id="out" class="btn sm hidden m-only" type="button">keluar</button></div>
+</header>
+
+<main id="login" class="login hidden">
+  <h1 style="text-align:center">login admin</h1>
+  <form id="loginForm">
+    <div class="q"><h3>Email</h3><input id="em" type="email" autocomplete="username" required></div>
+    <div class="q"><h3>Password</h3><input id="pw" type="password" autocomplete="current-password" required></div>
+    <div id="loginErr" class="err" role="alert"></div>
+    <button class="btn primary block" type="submit" id="loginBtn">masuk</button>
+  </form>
+</main>
+
+<main id="panel" class="wrap hidden">
+  <div class="tabs main m-only" id="tabs">
+    <button data-t="kode" class="on">🔑 kode</button>
+    <button data-t="bukti">🧾 cek bukti <span id="pend" class="badge hidden">0</span></button>
+    <button data-t="harga">💰 harga</button>
+  </div>
+
+  <section id="t-kode">
+    <div class="card" style="text-align:center;max-width:720px;margin:0 auto">
+      <p class="sub" style="margin:0">Kode hari ini · sama untuk semua orang</p>
+      <div id="code" class="bigcode">······</div>
+      <p class="sub" id="cd">—</p>
+      <div class="row"><button id="copyCode" class="btn primary" type="button">salin kode</button><button id="copyMsg" class="btn mint" type="button">salin pesan grup</button><a id="shareTg" class="btn lav" target="_blank" rel="noopener">bagikan ke telegram</a></div>
+      <div class="row"><button id="reroll" class="btn red sm" type="button">acak ulang sekarang</button></div>
+      <p class="sub"><small>Kode berganti otomatis tiap 00:00 WIB selama halaman ini terbuka. Kalau tidak ada admin yang membuka halaman ini setelah 00:00, kode lama sudah mati dan member belum bisa masuk sampai kode baru dibuat (buka /admin sekali).</small></p>
+    </div>
+  </section>
+
+  <section id="t-bukti" class="hidden">
+    <div class="pills" id="stFilter"></div>
+    <div class="filters"><input id="qReg" placeholder="Cari nomor HP…" inputmode="numeric"></div>
+    <div id="regList" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr))"></div>
+  </section>
+
+  <section id="t-harga" class="hidden">
+    <div class="q" style="max-width:520px"><h3>Harga pendaftaran</h3><p class="hint">Tampil di halaman /daftar. Default Rp 20.000.</p>
+      <input id="priceIn" type="text" inputmode="numeric" placeholder="20.000"><div class="row"><button id="priceSave" class="btn primary" type="button">simpan harga</button></div></div>
+  </section>
+</main>
+</div></div>
+<script type="module" src="admin.js"></script>
+</body>
+</html>

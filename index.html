@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BOLASEPAK — Prediksi Bola</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Prediksi bola statistik + opini AI, diperbarui otomatis tiap hari.">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+<aside id="side" class="side" aria-label="Menu"></aside><div id="scrim" class="scrim"></div>
+<div class="col">
+<header class="mast">
+  <button id="burger" class="burger" type="button" aria-label="Menu" aria-controls="side" aria-expanded="false"><i></i><i></i><i></i></button>
+  <a class="logo" href="./"><img src="logo.png" alt="BOLASEPAK">bolasepak<b>prediksi</b></a>
+  <span class="ttl d-only">prediksi bola</span>
+  <div class="right"><a class="btn sm primary m-only" href="daftar.html">daftar</a><button id="btnOut" class="btn sm hidden m-only" type="button">keluar</button></div>
+</header>
+
+<main id="gate" class="gate hidden">
+  <img class="big" src="logo.png" alt="">
+  <h1>masukkan kode</h1>
+  <p class="sub">Kode 6 huruf berganti setiap hari. Member dapat kodenya di grup Telegram.</p>
+  <form id="gateForm" autocomplete="off">
+    <input id="codeIn" class="codein" maxlength="6" inputmode="latin" autocapitalize="characters" spellcheck="false" placeholder="••••••" aria-label="Kode harian">
+    <div id="gateErr" class="err" role="alert"></div>
+    <button id="gateBtn" class="btn primary block" type="submit">masuk</button>
+  </form>
+  <p class="sub" style="margin-top:18px">Belum punya kode? <a href="daftar.html"><b>Daftar di sini</b></a></p>
+</main>
+
+<main id="app" class="wrap hidden">
+  <h1 class="m-only">prediksi bola</h1>
+  <p class="sub">Model Poisson + Dixon-Coles + Elo, digabung probabilitas pasar dan dikalibrasi dari rekam jejak.</p>
+  <div id="warn"></div>
+  <p id="meta" class="sub"></p>
+  <div class="tabs main m-only" id="mainTabs"><button data-view="prediksi" class="on">⚽ prediksi</button><button data-view="riwayat">📜 riwayat</button></div>
+
+  <section id="vPrediksi">
+    <div class="tabs" id="subTabs"><button data-tab="rumus" class="on">📊 rumus</button><button data-tab="ai">🤖 ai</button></div>
+    <div id="pControls"></div>
+    <div class="filters"><input id="qIn" placeholder="Cari tim…" aria-label="Cari tim"><select id="sortSel" aria-label="Urutan"><option value="time">Urut jam</option><option value="conf">Urut keyakinan</option></select></div>
+    <div id="pContent"></div>
+  </section>
+
+  <section id="vRiwayat" class="hidden"></section>
+
+  <footer class="foot">Prediksi adalah estimasi statistik, bukan jaminan hasil. Cedera/skorsing hanya diperhitungkan sebagian, susunan pemain resmi tidak. Untuk hiburan &amp; analisis. Perjudian dilarang di Indonesia — jangan gunakan untuk taruhan.</footer>
+</main>
+</div></div>
+<script type="module" src="script.js"></script>
+</body>
+</html>
